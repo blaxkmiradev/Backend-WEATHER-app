@@ -4,30 +4,31 @@ import requests
 import os
 
 app = Flask(__name__)
-# Enable CORS so your React app can talk to it
 CORS(app)
 
-# Add your Key in Vercel Dashboard Environment Variables
+# OpenWeather API Key (Set this in Vercel Dashboard!)
 API_KEY = os.environ.get("WEATHER_API_KEY")
 
-@app.route('/api/index', methods=['GET'])
-def get_weather():
+# We define multiple routes to ensure the 404 disappears
+@app.route('/')
+@app.route('/api')
+@app.route('/api/index')
+def weather_api():
     city = request.args.get('city')
     if not city:
-        return jsonify({"error": "No city provided"}), 400
+        return jsonify({"message": "Backend is Online", "usage": "/api/index?city=London"}), 200
 
-    # Handle encoding (like spaces in Phnom Penh) automatically via requests
     url = "http://api.openweathermap.org/data/2.5/weather"
     params = {
         "q": city,
         "appid": API_KEY,
         "units": "metric"
     }
-    
+
     try:
         response = requests.get(url, params=params)
         data = response.json()
-
+        
         if response.status_code != 200:
             return jsonify({"error": data.get("message", "City not found")}), response.status_code
 
@@ -36,13 +37,12 @@ def get_weather():
             "temp": data["main"]["temp"],
             "description": data["weather"][0]["description"],
             "humidity": data["main"]["humidity"],
-            "wind": data["wind"]["speed"],
-            "icon": data["weather"][0]["icon"]
+            "wind": data["wind"]["speed"]
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Required for Vercel
-def handler(event, context):
-    return app(event, context)
+# Vercel needs the 'app' object, but this allows local testing
+if __name__ == "__main__":
+    app.run(debug=True)
     
