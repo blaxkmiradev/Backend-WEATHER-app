@@ -8,8 +8,8 @@ CORS(app)
 
 API_KEY = os.environ.get("WEATHER_API_KEY")
 
-# Keep the route exactly like this
-@app.route('/api/weather', methods=['GET'])
+# IMPORTANT: Route must match the filename 'index' for Vercel to find it without rewrites
+@app.route('/api/index', methods=['GET'])
 def get_weather():
     city = request.args.get('city')
     if not city:
@@ -28,7 +28,4 @@ def get_weather():
         "description": data["weather"][0]["description"],
         "humidity": data["main"]["humidity"]
     })
-
-# This is the "magic" line for Vercel
-if __name__ == "__main__":
-    app.run()
+    
