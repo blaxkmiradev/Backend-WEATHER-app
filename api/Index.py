@@ -4,12 +4,11 @@ import requests
 import os
 
 app = Flask(__name__)
-# Allow your specific Vercel frontend URL or use '*' for testing
 CORS(app)
 
+API_KEY = os.environ.get("WEATHER_API_KEY")
 
-API_KEY = os.environ.get("OPENWEATHER_API_KEY")
-
+# Keep the route exactly like this
 @app.route('/api/weather', methods=['GET'])
 def get_weather():
     city = request.args.get('city')
@@ -25,14 +24,11 @@ def get_weather():
     data = response.json()
     return jsonify({
         "name": data["name"],
-        "country": data["sys"]["country"],
         "temp": data["main"]["temp"],
         "description": data["weather"][0]["description"],
-        "humidity": data["main"]["humidity"],
-        "wind_speed": data["wind"]["speed"]
+        "humidity": data["main"]["humidity"]
     })
 
-
-def handler(event, context):
-    return app(event, context)
-    
+# This is the "magic" line for Vercel
+if __name__ == "__main__":
+    app.run()
